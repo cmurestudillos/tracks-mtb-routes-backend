@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { upload, handleMulterError } = require('../middlewares/upload.middleware');
+const { upload, gpxUpload, handleMulterError } = require('../middlewares/upload.middleware');
 const { uploadToBlob, deleteFromBlob } = require('../config/blob.config');
 const { isTokenValid } = require('../middlewares/auth.middlewares');
 const logger = require('../config/logger');
@@ -242,6 +242,60 @@ router.delete('/', isTokenValid, async (req, res, next) => {
     });
   } catch (error) {
     logger.error({ err: error.message }, 'Error al eliminar imagen');
+    next(error);
+  }
+});
+
+/**
+ * @swagger
+ * /api/upload/gpx:
+ *   post:
+ *     summary: Sube un archivo GPX a Vercel Blob
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               gpx:
+ *                 type: string
+ *                 format: binary
+ *                 description: Archivo GPX (máx 50MB)
+ *     responses:
+ *       200:
+ *         description: GPX subido correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 gpxUrl:
+ *                   type: string
+ *                   format: uri
+ *       400:
+ *         description: Archivo no válido o no proporcionado
+ */
+router.post('/gpx', isTokenValid, gpxUpload.single('gpx'), handleMulterError, async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se ha proporcionado ningún archivo GPX' });
+    }
+
+    logger.debug({ filename: req.file.originalname, size: req.file.size }, 'Subiendo GPX');
+
+    const result = await uploadToBlob(req.file.buffer, req.file.originalname, 'gpx');
+
+    res.status(200).json({
+      message: 'GPX subido correctamente',
+      gpxUrl: result.url,
+      pathname: result.pathname,
+    });
+  } catch (error) {
+    logger.error({ err: error.message }, 'Error al subir GPX');
     next(error);
   }
 });

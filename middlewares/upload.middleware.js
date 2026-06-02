@@ -85,8 +85,32 @@ const validateFileUpload = (req, res, next) => {
   next();
 };
 
+/**
+ * Multer específico para archivos GPX
+ */
+const gpxFilter = (req, file, cb) => {
+  const isGpx =
+    file.mimetype === 'application/gpx+xml' ||
+    file.mimetype === 'text/xml' ||
+    file.mimetype === 'application/xml' ||
+    file.originalname.toLowerCase().endsWith('.gpx');
+
+  if (isGpx) {
+    cb(null, true);
+  } else {
+    cb(new Error('Solo se permiten archivos GPX (.gpx)'));
+  }
+};
+
+const gpxUpload = multer({
+  storage,
+  fileFilter: gpxFilter,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB — los GPX pueden ser grandes
+});
+
 module.exports = {
   upload,
+  gpxUpload,
   handleMulterError,
   validateFileUpload,
 };
