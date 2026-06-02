@@ -57,23 +57,11 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter);
 
-// CORS configuración
+// Configurar CORS
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Permitir requests sin origin (mobile apps, curl, etc)
-    if (!origin) return callback(null, true);
-
-    if (config.allowedOrigins.indexOf(origin) !== -1 || config.nodeEnv === 'development') {
-      callback(null, true);
-    } else {
-      callback(new Error('No permitido por CORS'));
-    }
-  },
+  origin: process.env.FRONTEND_URL || '*',
   methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
-  credentials: true,
-  optionsSuccessStatus: 200,
 };
-
 app.use(cors(corsOptions));
 
 // Middlewares generales
