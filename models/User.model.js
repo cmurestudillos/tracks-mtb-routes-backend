@@ -27,9 +27,10 @@ const userSchema = new Schema(
     },
     image: {
       type: String,
-      default: 'https://i.pinimg.com/564x/67/2c/d6/672cd616936e481ef2632306731a87cd.jpg',
+      default: null,
       validate: {
         validator: function (v) {
+          if (!v) return true; // null/vacío es válido
           return /^https?:\/\/.+/.test(v);
         },
         message: 'La URL de la imagen no es válida',
