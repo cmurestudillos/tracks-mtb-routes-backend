@@ -15,10 +15,16 @@ const config = {
   tokenSecret: process.env.TOKEN_SECRET,
   tokenExpiration: '30d',
 
-  // CORS
-  allowedOrigins: process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-    : [process.env.ORIGIN || 'http://localhost:5173'],
+  // CORS — combina ALLOWED_ORIGINS + FRONTEND_URL (más fácil de gestionar en Vercel)
+  allowedOrigins: (() => {
+    const base = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+      : ['http://localhost:5173', 'http://localhost:3000'];
+    if (process.env.FRONTEND_URL && !base.includes(process.env.FRONTEND_URL)) {
+      base.push(process.env.FRONTEND_URL);
+    }
+    return base;
+  })(),
 
   // Vercel Blob
   blobToken: process.env.BLOB_READ_WRITE_TOKEN,
@@ -33,15 +39,12 @@ const config = {
   allowedImageTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'],
 };
 
-// Validar variables de entorno críticas en producción
+// Advertir sobre variables faltantes (sin process.exit — incompatible con Vercel serverless)
 if (config.nodeEnv === 'production') {
   const requiredEnvVars = ['MONGO_URI_PRODUCTION', 'TOKEN_SECRET', 'BLOB_READ_WRITE_TOKEN'];
   const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
   if (missingEnvVars.length > 0) {
-    console.error('❌ Faltan las siguientes variables de entorno en producción:');
-    missingEnvVars.forEach(varName => console.error(`   - ${varName}`));
-    process.exit(1);
+    console.error('WARN: Variables de entorno faltantes:', missingEnvVars.join(', '));
   }
 }
 

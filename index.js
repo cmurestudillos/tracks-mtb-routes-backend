@@ -23,8 +23,16 @@ const { errorHandler, notFound } = require('./middlewares/errorHandler.middlewar
 
 const app = express();
 
-// Conectar a MongoDB
-connectDB();
+// Middleware que garantiza conexión a MongoDB antes de cada request a /api
+// En Vercel serverless es necesario porque cada invocación puede ser un cold start
+app.use('/api', async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch {
+    res.status(503).json({ error: 'Base de datos no disponible. Inténtalo en unos segundos.' });
+  }
+});
 
 // Configurar Helmet con excepciones para Swagger UI
 app.use(
@@ -57,23 +65,17 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter);
 
-// Configurar CORS
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Permitir requests sin origin (Postman, mobile, curl, etc)
-    if (!origin) return callback(null, true);
-    if (config.allowedOrigins.indexOf(origin) !== -1 || config.nodeEnv === 'development') {
-      callback(null, true);
-    } else {
-      callback(new Error('No permitido por CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+// CORS — origin '*' es válido para apps JWT (no cookies)
+// credentials:true solo es necesario para cookies; JWT usa header Authorization
+app.use(
+  cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+// Responder preflight OPTIONS en todas las rutas
+app.options('*', cors());
 
 // Middlewares generales
 app.use(morgan(config.nodeEnv === 'production' ? 'combined' : 'dev'));
