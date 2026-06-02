@@ -1,0 +1,83 @@
+# ===================================================
+# DEPENDENCIAS
+# ===================================================
+node_modules/
+
+# ===================================================
+# VARIABLES DE ENTORNO — NUNCA subir al repositorio
+# ===================================================
+.env
+.env.local
+.env.*.local
+
+# ===================================================
+# BUILDS Y COMPILADOS
+# ===================================================
+dist/
+build/
+coverage/
+
+# ===================================================
+# LOGS
+# ===================================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===================================================
+# LOCK FILES DE OTROS GESTORES (el proyecto usa pnpm)
+# pnpm-lock.yaml SÍ se commitea
+# ===================================================
+package-lock.json
+yarn.lock
+bun.lockb
+
+# ===================================================
+# VERCEL
+# ===================================================
+.vercel
+
+# ===================================================
+# SISTEMA OPERATIVO
+# ===================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+desktop.ini
+*.lnk
+
+# Linux
+*~
+
+# ===================================================
+# EDITORES E IDEs
+# ===================================================
+
+# VS Code — se comparten extensions.json y settings.json del proyecto
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains (WebStorm, IntelliJ...)
+.idea/
+*.iml
+*.iws
+
+# Vim / Emacs
+*.swp
+*.swo
+.#*
+\#*#
