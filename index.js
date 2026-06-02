@@ -59,8 +59,19 @@ app.use('/api/', limiter);
 
 // Configurar CORS
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || '*',
-  methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (Postman, mobile, curl, etc)
+    if (!origin) return callback(null, true);
+    if (config.allowedOrigins.indexOf(origin) !== -1 || config.nodeEnv === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 
