@@ -121,11 +121,9 @@ const rutaSchema = new Schema(
     },
     image: {
       type: String,
-      default:
-        'https://pixabay.com/get/g261479b0a4a104cc65c698fb0e6a4006f3f0eddd8971b882739fb6b5b3041f9feecff238755c622b61f439caa6bfd865ee3b1460b208efd8d150b6f9be35fb60_1280.jpg',
       validate: {
         validator: function (v) {
-          return /^https?:\/\/.+/.test(v);
+          return !v || /^https?:\/\/.+/.test(v);
         },
         message: 'La URL de la imagen no es válida',
       },
@@ -163,6 +161,11 @@ const rutaSchema = new Schema(
     // GPX track (opcional)
     gpxUrl: {
       type: String,
+    },
+    // Puntos del track GPS importado — array de [lat, lon]
+    trackPoints: {
+      type: [[Number]],
+      default: [],
     },
     // Estadísticas
     views: {
